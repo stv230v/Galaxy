@@ -26,6 +26,12 @@ controls.mouseButtons = {
 	RIGHT: THREE.MOUSE.ROTATE
 };
 
+// Stop restoring if user interacts
+controls.addEventListener('start', () => {
+  if (isRestoring) isRestoring = false;
+  if (isZooming) isZooming = false;
+});
+
 // Zoom Buttons
 const btnZoomIn = document.getElementById('btn-zoom-in');
 const btnZoomOut = document.getElementById('btn-zoom-out');
@@ -162,6 +168,13 @@ const sunMat = new THREE.ShaderMaterial({
 });
 const sunGeo = new THREE.SphereGeometry(sunRadius, 64, 64);
 const sun = new THREE.Mesh(sunGeo, sunMat);
+// Hit area for Sun
+const sunHitGeo = new THREE.SphereGeometry(sunRadius * 1.5, 16, 16);
+const sunHitMat = new THREE.MeshBasicMaterial({ visible: false });
+const sunHitMesh = new THREE.Mesh(sunHitGeo, sunHitMat);
+sunHitMesh.userData = { isHitArea: true, parentPlanet: sun };
+sun.add(sunHitMesh);
+
 scene.add(sun);
 
 // Add a glow sprite (Corona)
@@ -264,20 +277,29 @@ function createPlanetMesh(radius, type, color1, color2){
     metalness: 0.1
   });
   const geo = new THREE.SphereGeometry(radius, 64, 64);
-  return new THREE.Mesh(geo, mat);
+  const mesh = new THREE.Mesh(geo, mat);
+
+  // Hit area (invisible larger sphere)
+  const hitGeo = new THREE.SphereGeometry(radius * 2.5, 16, 16); // 2.5x larger hit area
+  const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+  const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+  hitMesh.userData = { isHitArea: true, parentPlanet: mesh };
+  mesh.add(hitMesh);
+
+  return mesh;
 }
 
 // planet data (approx scaled distances and sizes for visualization)
 // Added type and colors for texture generation
 const planets = [
-  {name:'Mercury', size:0.3, dist:6, speed:0.04, type:'rock', c1:'#999999', c2:'#666666', desc:'太陽に最も近い惑星。昼夜の温度差が非常に激しい。'},
-  {name:'Venus', size:0.6, dist:8, speed:0.03, type:'rock', c1:'#dcb060', c2:'#b89040', desc:'厚い雲に覆われた灼熱の惑星。地球と大きさが似ている。'},
-  {name:'Earth', size:0.65, dist:11, speed:0.025, type:'earth', c1:'#0000ff', c2:'#00ff00', desc:'生命が存在する唯一の既知の惑星。表面の7割が海。'},
-  {name:'Mars', size:0.45, dist:14, speed:0.02, type:'rock', c1:'#b53505', c2:'#8a2500', desc:'赤い惑星。かつて水が存在した痕跡がある。'},
-  {name:'Jupiter', size:1.6, dist:18, speed:0.012, type:'gas', c1:'#c08020', c2:'#906030', desc:'太陽系最大のガス惑星。巨大な大赤斑が特徴。'},
-  {name:'Saturn', size:1.3, dist:22, speed:0.01, type:'gas', c1:'#d4c090', c2:'#b0a070', desc:'美しい環を持つガス惑星。密度が水より小さい。'},
-  {name:'Uranus', size:1.0, dist:26, speed:0.007, type:'gas', c1:'#60d0d8', c2:'#40b0b8', desc:'自転軸が横倒しになっている氷の巨大惑星。'},
-  {name:'Neptune', size:0.98, dist:30, speed:0.006, type:'gas', c1:'#3050cc', c2:'#2040a0', desc:'太陽系で最も遠い惑星。強い嵐が吹き荒れている。'}
+  {name:'Mercury', size:0.3, dist:6, speed:0.02, type:'rock', c1:'#999999', c2:'#666666', desc:'太陽に最も近い惑星。昼夜の温度差が非常に激しい。'},
+  {name:'Venus', size:0.6, dist:8, speed:0.015, type:'rock', c1:'#dcb060', c2:'#b89040', desc:'厚い雲に覆われた灼熱の惑星。地球と大きさが似ている。'},
+  {name:'Earth', size:0.65, dist:11, speed:0.0125, type:'earth', c1:'#0000ff', c2:'#00ff00', desc:'生命が存在する唯一の既知の惑星。表面の7割が海。'},
+  {name:'Mars', size:0.45, dist:14, speed:0.01, type:'rock', c1:'#b53505', c2:'#8a2500', desc:'赤い惑星。かつて水が存在した痕跡がある。'},
+  {name:'Jupiter', size:1.6, dist:18, speed:0.006, type:'gas', c1:'#c08020', c2:'#906030', desc:'太陽系最大のガス惑星。巨大な大赤斑が特徴。'},
+  {name:'Saturn', size:1.3, dist:22, speed:0.005, type:'gas', c1:'#d4c090', c2:'#b0a070', desc:'美しい環を持つガス惑星。密度が水より小さい。'},
+  {name:'Uranus', size:1.0, dist:26, speed:0.0035, type:'gas', c1:'#60d0d8', c2:'#40b0b8', desc:'自転軸が横倒しになっている氷の巨大惑星。'},
+  {name:'Neptune', size:0.98, dist:30, speed:0.003, type:'gas', c1:'#3050cc', c2:'#2040a0', desc:'太陽系で最も遠い惑星。強い嵐が吹き荒れている。'}
 ];
 
 // groups to rotate for orbits
@@ -655,7 +677,21 @@ function spawnUFO(ufo) {
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let focusedObject = null; // The mesh we are following
-let isFocusing = false;   // Whether we are currently in "focus mode"
+let isFocusing = false;
+let savedCameraPos = new THREE.Vector3();
+let savedControlsTarget = new THREE.Vector3();
+let isRestoring = false;
+let lastTargetPos = new THREE.Vector3(); // To track planet movement
+let isZooming = false;
+
+// Track mouse down to distinguish click from drag
+const mouseDownPos = new THREE.Vector2();
+window.addEventListener('mousedown', (e) => {
+  mouseDownPos.set(e.clientX, e.clientY);
+});
+
+// Prevent context menu for right-click rotation
+window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 window.addEventListener('click', onMouseClick, false);
 
@@ -663,35 +699,72 @@ function onMouseClick(event) {
   // Ignore clicks on UI buttons
   if(event.target !== renderer.domElement) return;
 
+  // Check if dragged (if mouse moved more than 5px, it's a drag, not a click)
+  const dist = mouseDownPos.distanceTo(new THREE.Vector2(event.clientX, event.clientY));
+  if(dist > 5) return;
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
 
-  // Targets: Planets + Sun
+  // Targets: Planets + Sun + Moon
   const targets = planetMeshes.map(p => p.mesh);
   targets.push(sun);
+  if(moonMesh) targets.push(moonMesh);
 
-  const intersects = raycaster.intersectObjects(targets);
+  // Recursive check to hit invisible hit-areas
+  const intersects = raycaster.intersectObjects(targets, true);
 
   if (intersects.length > 0) {
-    const object = intersects[0].object;
+    let object = intersects[0].object;
+    
+    // If we hit the invisible hit-area, use the parent planet
+    if (object.userData && object.userData.isHitArea) {
+      object = object.userData.parentPlanet;
+    }
+
     let data = planetMeshes.find(p => p.mesh === object)?.data;
     
     // Special case for Sun
     if(object === sun) {
       data = { name: 'Sun', desc: '太陽系の中心にある恒星。巨大なエネルギーを放出し続けている。' };
     }
+    // Special case for Moon
+    if(object === moonMesh) {
+      data = { name: 'Moon', desc: '地球の唯一の衛星。潮の満ち引きに影響を与えている。' };
+    }
 
     if (data) {
       focusOnPlanet(object, data);
     }
+  } else {
+    // Clicked on empty space -> Close info
+    closeInfo();
+  }
+}
+
+function closeInfo() {
+  const infoDiv = document.getElementById('planet-info');
+  if(infoDiv) infoDiv.style.display = 'none';
+  
+  // Only restore if we were actually focusing
+  if (isFocusing) {
+    focusedObject = null;
+    isFocusing = false;
+    isRestoring = true; // Start restoring animation
   }
 }
 
 function focusOnPlanet(mesh, data) {
+  if (!isFocusing) {
+    // Save current state only if not already focusing (to keep the original wide view)
+    savedCameraPos.copy(camera.position);
+    savedControlsTarget.copy(controls.target);
+  }
   focusedObject = mesh;
   isFocusing = true;
+  isRestoring = false; // Stop restoring if we click a planet
 
   // Show UI
   const infoDiv = document.getElementById('planet-info');
@@ -710,29 +783,19 @@ function focusOnPlanet(mesh, data) {
   // Calculate a nice offset position
   const targetPos = new THREE.Vector3();
   mesh.getWorldPosition(targetPos);
+  lastTargetPos.copy(targetPos); // Initialize last position
   
-  // Move camera to a relative position (e.g. +5 units in Z from the planet)
-  // We need to be careful not to jump instantly if we want smooth transition,
-  // but for now let's just snap the target and let OrbitControls handle the view.
-  // To "zoom in", we can move the camera position.
+  // Start zooming in animation
+  isZooming = true;
   
-  const offset = new THREE.Vector3(0, 2, 5); // Offset from planet
-  const newCamPos = targetPos.clone().add(offset);
-  
-  // Simple interpolation could be done here, but let's just set it for responsiveness
-  // camera.position.copy(newCamPos); 
-  // controls.target.copy(targetPos);
+  // Set target immediately to the planet so we look at it
+  controls.target.copy(targetPos);
 }
 
 // Close button handler
 const btnClose = document.getElementById('btn-close-info');
 if(btnClose) {
-  btnClose.addEventListener('click', () => {
-    document.getElementById('planet-info').style.display = 'none';
-    focusedObject = null;
-    isFocusing = false;
-    // Optionally reset camera or leave it there
-  });
+  btnClose.addEventListener('click', closeInfo);
 }
 
 // simple camera orbit controls (auto rotate)
@@ -741,26 +804,30 @@ function animate(now){
   now *= 0.001; // seconds
   const delta = now - time; time = now;
 
+  // Slow down simulation if focusing
+  const timeScale = isFocusing ? 0.05 : 1.0;
+  const simDelta = delta * timeScale;
+
   // update sun shader time
   sunUniforms.uTime.value = now;
 
   // rotate orbits
-  orbitGroups.forEach(o=>{ o.group.rotation.y += o.speed * delta * 60; });
+  orbitGroups.forEach(o=>{ o.group.rotation.y += o.speed * simDelta * 60; });
 
   // update moon orbit position to earth position
   if(earthIndex>=0 && moonMesh){
     const earthPos = planetMeshes[earthIndex].mesh.getWorldPosition(new THREE.Vector3());
     moonOrbit.position.copy(earthPos);
-    moonOrbit.rotation.y += 0.04 * delta * 60; // moon rotates around earth
+    moonOrbit.rotation.y += 0.04 * simDelta * 60; // moon rotates around earth
     // set moon distance along local x
     moonMesh.position.set(1.8, 0, 0);
   }
 
   // Update meteorites
   meteorites.forEach(m => {
-    m.mesh.position.addScaledVector(m.velocity, delta);
-    m.mesh.rotation.x += delta;
-    m.mesh.rotation.y += delta * 0.5;
+    m.mesh.position.addScaledVector(m.velocity, simDelta);
+    m.mesh.rotation.x += simDelta;
+    m.mesh.rotation.y += simDelta * 0.5;
 
     // Wrap around if too far
     if(m.mesh.position.length() > 150) {
@@ -781,9 +848,9 @@ function animate(now){
   // Update UFOs
   ufos.forEach(ufo => {
     if(ufo.active) {
-      ufo.group.position.addScaledVector(ufo.velocity, delta);
+      ufo.group.position.addScaledVector(ufo.velocity, simDelta);
       // Spin the saucer body (child 0)
-      ufo.group.children[0].rotation.y += delta * 10; 
+      ufo.group.children[0].rotation.y += simDelta * 10; 
       
       // Check bounds (if far away)
       if(ufo.group.position.length() > 100) {
@@ -807,17 +874,35 @@ function animate(now){
       const targetPos = new THREE.Vector3();
       focusedObject.getWorldPosition(targetPos);
       
+      // Move camera along with the planet to maintain relative position
+      const deltaPos = targetPos.clone().sub(lastTargetPos);
+      camera.position.add(deltaPos);
+      lastTargetPos.copy(targetPos);
+
       // Smoothly move controls target to the planet
       controls.target.lerp(targetPos, 0.1);
       
-      // Optional: Also make camera follow at a fixed distance?
-      // For now, just updating target allows user to rotate around the moving planet.
-      // If we want to "zoom in" automatically, we would need to lerp camera.position as well.
-      const dist = camera.position.distanceTo(targetPos);
-      if(dist > 8) {
-        // Smoothly zoom in if too far
-        const idealPos = targetPos.clone().add(new THREE.Vector3(0, 2, 5));
-        camera.position.lerp(idealPos, 0.05);
+      // Zoom in logic
+      if (isZooming) {
+        const dist = camera.position.distanceTo(targetPos);
+        const targetDist = 15; // Keep some distance (overview)
+        if (dist > targetDist + 1) {
+          // Move closer while maintaining direction
+          const dir = camera.position.clone().sub(targetPos).normalize();
+          const idealPos = targetPos.clone().add(dir.multiplyScalar(targetDist));
+          camera.position.lerp(idealPos, 0.05);
+        } else {
+          isZooming = false;
+        }
+      }
+    } else if (isRestoring) {
+      // Restore camera and target
+      camera.position.lerp(savedCameraPos, 0.05);
+      controls.target.lerp(savedControlsTarget, 0.05);
+      
+      if (camera.position.distanceTo(savedCameraPos) < 0.5 && controls.target.distanceTo(savedControlsTarget) < 0.5) {
+        isRestoring = false;
+        // controls.update() will handle the rest
       }
     }
     controls.update();
