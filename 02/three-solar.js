@@ -458,6 +458,78 @@ function createFlyingMeteorites() {
 }
 createFlyingMeteorites();
 
+// --- UFOs ---
+const ufos = [];
+const ufoCount = 2;
+
+function createUFOMesh() {
+  const group = new THREE.Group();
+  
+  // Saucer body (Larger)
+  const bodyGeo = new THREE.SphereGeometry(0.7, 32, 16);
+  bodyGeo.scale(1, 0.25, 1);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xa0a0a0, metalness: 0.8, roughness: 0.2 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  group.add(body);
+  
+  // Cockpit dome (Larger)
+  const domeGeo = new THREE.SphereGeometry(0.35, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+  const domeMat = new THREE.MeshStandardMaterial({ color: 0x88ccff, emissive: 0x2244aa, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.8 });
+  const dome = new THREE.Mesh(domeGeo, domeMat);
+  dome.position.y = 0.08;
+  group.add(dome);
+  
+  // Lights ring (Adjusted position)
+  const lightGeo = new THREE.SphereGeometry(0.05, 8, 8);
+  const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green lights
+  for(let i=0; i<8; i++){
+    const light = new THREE.Mesh(lightGeo, lightMat);
+    const angle = (i / 8) * Math.PI * 2;
+    light.position.set(Math.cos(angle)*0.6, 0, Math.sin(angle)*0.6);
+    group.add(light);
+  }
+  
+  scene.add(group);
+  group.visible = false;
+  return group;
+}
+
+function initUFOs() {
+  for(let i=0; i<ufoCount; i++) {
+    const group = createUFOMesh();
+    ufos.push({
+      group: group,
+      velocity: new THREE.Vector3(),
+      active: false,
+      nextTime: 5 + i * 15 // Stagger start times
+    });
+  }
+}
+initUFOs();
+
+function spawnUFO(ufo) {
+  ufo.active = true;
+  ufo.group.visible = true;
+  
+  // Start from random side far away
+  const angle = Math.random() * Math.PI * 2;
+  const dist = 90;
+  const startY = (Math.random() - 0.5) * 30;
+  ufo.group.position.set(Math.cos(angle)*dist, startY, Math.sin(angle)*dist);
+  
+  // Target somewhere on the other side
+  const targetAngle = angle + Math.PI + (Math.random()-0.5); // Roughly opposite
+  const targetY = (Math.random() - 0.5) * 30;
+  const targetPos = new THREE.Vector3(Math.cos(targetAngle)*dist, targetY, Math.sin(targetAngle)*dist);
+  
+  // Velocity
+  ufo.velocity.subVectors(targetPos, ufo.group.position).normalize().multiplyScalar(12); // Speed
+  
+  // Tilt slightly towards movement
+  ufo.group.lookAt(targetPos);
+  ufo.group.rotateX(Math.PI / 10); // Tilt forward a bit
+}
+
 // simple camera orbit controls (auto rotate)
 let time = 0;
 function animate(now){
@@ -498,6 +570,28 @@ function animate(now){
         (Math.random() - 0.5) * 2,
         (Math.random() - 0.5) * 10
       );
+    }
+  });
+
+  // Update UFOs
+  ufos.forEach(ufo => {
+    if(ufo.active) {
+      ufo.group.position.addScaledVector(ufo.velocity, delta);
+      // Spin the saucer body (child 0)
+      ufo.group.children[0].rotation.y += delta * 10; 
+      
+      // Check bounds (if far away)
+      if(ufo.group.position.length() > 100) {
+        ufo.active = false;
+        ufo.group.visible = false;
+        ufo.nextTime = now + 10 + Math.random() * 20; // Random cooldown 10-30s
+      }
+    } else {
+      if(now > ufo.nextTime) {
+        spawnUFO(ufo);
+        // Set next check time to avoid multiple spawns if logic fails
+        ufo.nextTime = now + 100; 
+      }
     }
   });
 
