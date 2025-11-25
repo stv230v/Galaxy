@@ -40,13 +40,13 @@ if(btnZoomIn && btnZoomOut) {
   btnZoomIn.addEventListener('click', () => {
     // Move camera closer
     const dist = camera.position.distanceTo(controls.target);
-    if(dist > 5) {
-      camera.translateZ(-5);
+    if(dist > 20) {
+      camera.translateZ(-15);
       controls.update();
     }
   });
   btnZoomOut.addEventListener('click', () => {
-    camera.translateZ(5);
+    camera.translateZ(15);
     controls.update();
   });
 }
