@@ -270,14 +270,14 @@ function createPlanetMesh(radius, type, color1, color2){
 // planet data (approx scaled distances and sizes for visualization)
 // Added type and colors for texture generation
 const planets = [
-  {name:'Mercury', size:0.3, dist:6, speed:0.04, type:'rock', c1:'#999999', c2:'#666666'},
-  {name:'Venus', size:0.6, dist:8, speed:0.03, type:'rock', c1:'#dcb060', c2:'#b89040'},
-  {name:'Earth', size:0.65, dist:11, speed:0.025, type:'earth', c1:'#0000ff', c2:'#00ff00'},
-  {name:'Mars', size:0.45, dist:14, speed:0.02, type:'rock', c1:'#b53505', c2:'#8a2500'},
-  {name:'Jupiter', size:1.6, dist:18, speed:0.012, type:'gas', c1:'#c08020', c2:'#906030'},
-  {name:'Saturn', size:1.3, dist:22, speed:0.01, type:'gas', c1:'#d4c090', c2:'#b0a070'},
-  {name:'Uranus', size:1.0, dist:26, speed:0.007, type:'gas', c1:'#60d0d8', c2:'#40b0b8'},
-  {name:'Neptune', size:0.98, dist:30, speed:0.006, type:'gas', c1:'#3050cc', c2:'#2040a0'}
+  {name:'Mercury', size:0.3, dist:6, speed:0.04, type:'rock', c1:'#999999', c2:'#666666', desc:'太陽に最も近い惑星。昼夜の温度差が非常に激しい。'},
+  {name:'Venus', size:0.6, dist:8, speed:0.03, type:'rock', c1:'#dcb060', c2:'#b89040', desc:'厚い雲に覆われた灼熱の惑星。地球と大きさが似ている。'},
+  {name:'Earth', size:0.65, dist:11, speed:0.025, type:'earth', c1:'#0000ff', c2:'#00ff00', desc:'生命が存在する唯一の既知の惑星。表面の7割が海。'},
+  {name:'Mars', size:0.45, dist:14, speed:0.02, type:'rock', c1:'#b53505', c2:'#8a2500', desc:'赤い惑星。かつて水が存在した痕跡がある。'},
+  {name:'Jupiter', size:1.6, dist:18, speed:0.012, type:'gas', c1:'#c08020', c2:'#906030', desc:'太陽系最大のガス惑星。巨大な大赤斑が特徴。'},
+  {name:'Saturn', size:1.3, dist:22, speed:0.01, type:'gas', c1:'#d4c090', c2:'#b0a070', desc:'美しい環を持つガス惑星。密度が水より小さい。'},
+  {name:'Uranus', size:1.0, dist:26, speed:0.007, type:'gas', c1:'#60d0d8', c2:'#40b0b8', desc:'自転軸が横倒しになっている氷の巨大惑星。'},
+  {name:'Neptune', size:0.98, dist:30, speed:0.006, type:'gas', c1:'#3050cc', c2:'#2040a0', desc:'太陽系で最も遠い惑星。強い嵐が吹き荒れている。'}
 ];
 
 // groups to rotate for orbits
@@ -368,8 +368,9 @@ createStarField();
 // --- Barred Spiral Galaxy (Background) ---
 function createGalaxy() {
   const galaxyGroup = new THREE.Group();
-  // Position it far away
-  galaxyGroup.position.set(-150, 50, -200);
+  // Position it far away (outside constellations)
+  galaxyGroup.position.set(-500, 150, -500);
+  galaxyGroup.scale.set(4, 4, 4);
   galaxyGroup.rotation.x = Math.PI / 3;
   galaxyGroup.rotation.z = Math.PI / 6;
 
@@ -507,6 +508,126 @@ function initUFOs() {
 }
 initUFOs();
 
+// --- Constellations (12 Zodiacs) ---
+function createConstellations() {
+  const constellations = [
+    // 1. Aries (おひつじ座)
+    {
+      stars: [{x:0,y:0}, {x:1,y:0.5}, {x:2,y:0.2}, {x:2.5,y:-0.5}],
+      lines: [[0,1], [1,2], [2,3]]
+    },
+    // 2. Taurus (おうし座)
+    {
+      stars: [{x:0,y:0}, {x:1,y:-1}, {x:2,y:-0.5}, {x:3,y:1}, {x:4,y:2}, {x:-1,y:2}],
+      lines: [[0,1], [1,2], [2,3], [3,4], [0,5]]
+    },
+    // 3. Gemini (ふたご座)
+    {
+      stars: [{x:0,y:4}, {x:1.5,y:4}, {x:0,y:0}, {x:1.5,y:0}, {x:0.5,y:2}, {x:1,y:2}],
+      lines: [[0,2], [1,3], [0,1], [2,3]]
+    },
+    // 4. Cancer (かに座)
+    {
+      stars: [{x:0,y:0}, {x:-1,y:1}, {x:1,y:1}, {x:0,y:-1}],
+      lines: [[0,1], [0,2], [0,3]]
+    },
+    // 5. Leo (しし座)
+    {
+      stars: [{x:0,y:0}, {x:0.5,y:1}, {x:1.5,y:1}, {x:2,y:0}, {x:2,y:-1}, {x:-1,y:-1}, {x:-2,y:0}],
+      lines: [[0,1], [1,2], [2,3], [3,4], [4,0], [0,5], [5,6], [6,0]]
+    },
+    // 6. Virgo (おとめ座)
+    {
+      stars: [{x:0,y:3}, {x:0,y:0}, {x:-1.5,y:-1}, {x:1.5,y:-1}, {x:2,y:1}],
+      lines: [[0,1], [1,2], [1,3], [3,4], [4,0]]
+    },
+    // 7. Libra (てんびん座)
+    {
+      stars: [{x:0,y:1}, {x:1.5,y:0}, {x:0,y:-1}, {x:-1.5,y:0}],
+      lines: [[0,1], [1,2], [2,3], [3,0]]
+    },
+    // 8. Scorpio (さそり座)
+    {
+      stars: [{x:0,y:3}, {x:-0.5,y:2.5}, {x:0,y:2}, {x:0,y:0}, {x:0.5,y:-1}, {x:1.5,y:-2}, {x:2.5,y:-1.5}],
+      lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6]]
+    },
+    // 9. Sagittarius (いて座)
+    {
+      stars: [{x:0,y:0}, {x:1.5,y:0}, {x:0.75,y:1}, {x:2,y:0.5}, {x:2.5,y:-0.5}, {x:-0.5,y:-0.5}],
+      lines: [[0,1], [1,2], [2,0], [1,3], [3,4], [4,1], [0,5], [5,1]]
+    },
+    // 10. Capricorn (やぎ座)
+    {
+      stars: [{x:0,y:1}, {x:2,y:1}, {x:1,y:-1}],
+      lines: [[0,1], [1,2], [2,0]]
+    },
+    // 11. Aquarius (みずがめ座)
+    {
+      stars: [{x:0,y:2}, {x:-1,y:1}, {x:1,y:1}, {x:0,y:0}, {x:0.5,y:-1}, {x:1.5,y:-0.5}],
+      lines: [[0,1], [0,2], [0,3], [3,4], [4,5]]
+    },
+    // 12. Pisces (うお座)
+    {
+      stars: [{x:0,y:0}, {x:1.5,y:2}, {x:-1.5,y:1.5}],
+      lines: [[0,1], [0,2]]
+    }
+  ];
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const radius = 400; 
+  const angleStep = (Math.PI * 2) / 12;
+
+  const starMat = new THREE.PointsMaterial({color: 0xffffff, size: 2.0});
+  const lineMat = new THREE.LineBasicMaterial({color: 0x5555ff, transparent: true, opacity: 0.3});
+
+  constellations.forEach((c, i) => {
+    const angle = i * angleStep;
+    const cx = Math.cos(angle) * radius;
+    const cz = Math.sin(angle) * radius;
+    const cy = (Math.random() - 0.5) * 100; 
+
+    const center = new THREE.Vector3(cx, cy, cz);
+    
+    const fwd = center.clone().normalize().negate();
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(fwd, up).normalize();
+    const realUp = new THREE.Vector3().crossVectors(right, fwd).normalize();
+
+    const scale = 8; 
+
+    const starPositions = [];
+    const starPoints = [];
+
+    c.stars.forEach(s => {
+      const pos = center.clone()
+        .add(right.clone().multiplyScalar(s.x * scale))
+        .add(realUp.clone().multiplyScalar(s.y * scale));
+      starPositions.push(pos.x, pos.y, pos.z);
+      starPoints.push(pos);
+    });
+
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+    const stars = new THREE.Points(starGeo, starMat);
+    group.add(stars);
+
+    const linePositions = [];
+    c.lines.forEach(pair => {
+      const p1 = starPoints[pair[0]];
+      const p2 = starPoints[pair[1]];
+      linePositions.push(p1.x, p1.y, p1.z);
+      linePositions.push(p2.x, p2.y, p2.z);
+    });
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+    const lines = new THREE.LineSegments(lineGeo, lineMat);
+    group.add(lines);
+  });
+}
+createConstellations();
+
 function spawnUFO(ufo) {
   ufo.active = true;
   ufo.group.visible = true;
@@ -528,6 +649,90 @@ function spawnUFO(ufo) {
   // Tilt slightly towards movement
   ufo.group.lookAt(targetPos);
   ufo.group.rotateX(Math.PI / 10); // Tilt forward a bit
+}
+
+// --- Interaction & Camera Focus ---
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let focusedObject = null; // The mesh we are following
+let isFocusing = false;   // Whether we are currently in "focus mode"
+
+window.addEventListener('click', onMouseClick, false);
+
+function onMouseClick(event) {
+  // Ignore clicks on UI buttons
+  if(event.target !== renderer.domElement) return;
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // Targets: Planets + Sun
+  const targets = planetMeshes.map(p => p.mesh);
+  targets.push(sun);
+
+  const intersects = raycaster.intersectObjects(targets);
+
+  if (intersects.length > 0) {
+    const object = intersects[0].object;
+    let data = planetMeshes.find(p => p.mesh === object)?.data;
+    
+    // Special case for Sun
+    if(object === sun) {
+      data = { name: 'Sun', desc: '太陽系の中心にある恒星。巨大なエネルギーを放出し続けている。' };
+    }
+
+    if (data) {
+      focusOnPlanet(object, data);
+    }
+  }
+}
+
+function focusOnPlanet(mesh, data) {
+  focusedObject = mesh;
+  isFocusing = true;
+
+  // Show UI
+  const infoDiv = document.getElementById('planet-info');
+  const nameEl = document.getElementById('info-name');
+  const descEl = document.getElementById('info-desc');
+  
+  if(infoDiv && nameEl && descEl) {
+    nameEl.innerText = data.name;
+    descEl.innerText = data.desc;
+    infoDiv.style.display = 'block';
+  }
+
+  // Move camera closer immediately (optional, or let animate handle it smoothly)
+  // Here we just set a flag, and animate() will update controls.target
+  
+  // Calculate a nice offset position
+  const targetPos = new THREE.Vector3();
+  mesh.getWorldPosition(targetPos);
+  
+  // Move camera to a relative position (e.g. +5 units in Z from the planet)
+  // We need to be careful not to jump instantly if we want smooth transition,
+  // but for now let's just snap the target and let OrbitControls handle the view.
+  // To "zoom in", we can move the camera position.
+  
+  const offset = new THREE.Vector3(0, 2, 5); // Offset from planet
+  const newCamPos = targetPos.clone().add(offset);
+  
+  // Simple interpolation could be done here, but let's just set it for responsiveness
+  // camera.position.copy(newCamPos); 
+  // controls.target.copy(targetPos);
+}
+
+// Close button handler
+const btnClose = document.getElementById('btn-close-info');
+if(btnClose) {
+  btnClose.addEventListener('click', () => {
+    document.getElementById('planet-info').style.display = 'none';
+    focusedObject = null;
+    isFocusing = false;
+    // Optionally reset camera or leave it there
+  });
 }
 
 // simple camera orbit controls (auto rotate)
@@ -596,7 +801,27 @@ function animate(now){
   });
 
   // Update controls
-  if(typeof controls !== 'undefined') controls.update();
+  if(typeof controls !== 'undefined') {
+    // If focusing on a planet, update target to follow it
+    if(isFocusing && focusedObject) {
+      const targetPos = new THREE.Vector3();
+      focusedObject.getWorldPosition(targetPos);
+      
+      // Smoothly move controls target to the planet
+      controls.target.lerp(targetPos, 0.1);
+      
+      // Optional: Also make camera follow at a fixed distance?
+      // For now, just updating target allows user to rotate around the moving planet.
+      // If we want to "zoom in" automatically, we would need to lerp camera.position as well.
+      const dist = camera.position.distanceTo(targetPos);
+      if(dist > 8) {
+        // Smoothly zoom in if too far
+        const idealPos = targetPos.clone().add(new THREE.Vector3(0, 2, 5));
+        camera.position.lerp(idealPos, 0.05);
+      }
+    }
+    controls.update();
+  }
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
