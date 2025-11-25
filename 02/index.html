@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Solar System</title>
+    <link rel="stylesheet" href="index.css">
+    <style>body{margin:0;background:#000;color:#fff;font-family:system-ui,Segoe UI,Roboto}</style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="scene-root" style="width:100vw;height:100vh;overflow:hidden;">
+        <!-- Three.js renderer will be appended here -->
+    </div>
+
+    <!-- UI Controls -->
+    <div style="position:absolute; bottom:20px; right:20px; display:flex; gap:10px;">
+        <button id="btn-zoom-in" style="padding:10px 20px; font-size:16px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:5px;">＋ 拡大</button>
+        <button id="btn-zoom-out" style="padding:10px 20px; font-size:16px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:5px;">－ 縮小</button>
+    </div>
+
+    <script type="module" src="./three-solar.js"></script>
+</body>
+</html>

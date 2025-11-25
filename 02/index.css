@@ -1,0 +1,5 @@
+/* Full-viewport canvas container */
+#scene-root{position:relative;width:100vw;height:100vh}
+#scene-root canvas{display:block;width:100%;height:100%}
+
+.overlay-ui{position:absolute;left:12px;top:12px;color:#fff;z-index:10;background:rgba(0,0,0,0.25);padding:8px;border-radius:6px;font-size:13px}
