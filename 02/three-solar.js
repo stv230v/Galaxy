@@ -686,7 +686,7 @@ let isZooming = false;
 
 // Track mouse down to distinguish click from drag
 const mouseDownPos = new THREE.Vector2();
-window.addEventListener('mousedown', (e) => {
+window.addEventListener('pointerdown', (e) => {
   mouseDownPos.set(e.clientX, e.clientY);
 });
 
