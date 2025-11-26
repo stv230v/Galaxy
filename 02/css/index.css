@@ -1,0 +1,83 @@
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, Segoe UI, Roboto;
+}
+
+/* Full-viewport canvas container */
+#scene-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+#scene-root canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-ui {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: #fff;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+#planet-info {
+  display: none;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 300px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #444;
+  padding: 20px;
+  border-radius: 8px;
+  color: white;
+  backdrop-filter: blur(5px);
+}
+
+#info-name {
+  margin-top: 0;
+  color: #4db8ff;
+}
+
+#info-desc {
+  line-height: 1.6;
+}
+
+#btn-close-info {
+  margin-top: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.ui-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+#btn-zoom-in,
+#btn-zoom-out {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid white;
+  border-radius: 5px;
+}

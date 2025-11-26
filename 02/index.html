@@ -1,38 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Three.js Solar System</title>
-    <link rel="stylesheet" href="index.css">
-    <style>body{margin:0;background:#000;color:#fff;font-family:system-ui,Segoe UI,Roboto}</style>
+    <link rel="stylesheet" href="css/index.css" />
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
-            }
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
         }
+      }
     </script>
-</head>
-<body>
-    <div id="scene-root" style="width:100vw;height:100vh;overflow:hidden;">
-        <!-- Three.js renderer will be appended here -->
+  </head>
+  <body>
+    <div id="scene-root">
+      <!-- Three.js renderer will be appended here -->
     </div>
 
     <!-- Planet Info Popup -->
-    <div id="planet-info" style="display:none; position:absolute; top:20px; left:20px; width:300px; background:rgba(0,0,0,0.8); border:1px solid #444; padding:20px; border-radius:8px; color:white; backdrop-filter: blur(5px);">
-        <h2 id="info-name" style="margin-top:0; color:#4db8ff;">Planet Name</h2>
-        <p id="info-desc" style="line-height:1.6;">Description goes here...</p>
-        <button id="btn-close-info" style="margin-top:10px; padding:8px 16px; cursor:pointer; background:#444; color:white; border:none; border-radius:4px;">閉じる</button>
+    <div id="planet-info">
+      <h2 id="info-name">Planet Name</h2>
+      <p id="info-desc">Description goes here...</p>
+      <button id="btn-close-info">閉じる</button>
     </div>
 
     <!-- UI Controls -->
-    <div style="position:absolute; bottom:20px; right:20px; display:flex; gap:10px;">
-        <button id="btn-zoom-in" style="padding:10px 20px; font-size:16px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:5px;">＋ 拡大</button>
-        <button id="btn-zoom-out" style="padding:10px 20px; font-size:16px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:5px;">－ 縮小</button>
+    <div class="ui-controls">
+      <button id="btn-zoom-in">＋ 拡大</button>
+      <button id="btn-zoom-out">－ 縮小</button>
     </div>
 
-    <script type="module" src="./three-solar.js"></script>
-</body>
+    <script type="module" src="js/three-solar.js"></script>
+  </body>
 </html>
